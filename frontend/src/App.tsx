@@ -7,6 +7,11 @@ import HomePage from "./pages/home";
 import { AuthProvider } from "./auth/AuthProvider";
 import SolutionPage from "./pages/solution-page";
 import ProblemListPage from "./pages/problem-list-page";
+import CreateProblem from "./pages/create-problem";
+import AdminProblemListPage from "./pages/admin-problem-list";
+import EditProblem from "./pages/edit-problem";
+import AdminDashboard from "./components/admin/admin-dashboard";
+import AdminGuard from "./components/auth/admin-guard";
 
 function App() {
   return (
@@ -24,6 +29,44 @@ function App() {
                 path={`/problems/:slug/solution`}
                 element={<SolutionPage />}
               />
+
+              {/*Admin Routes */}
+
+              <Route
+                path="/admin/create-problem"
+                element={
+                  <AdminGuard>
+                    <CreateProblem />
+                  </AdminGuard>
+                }
+              ></Route>
+
+              <Route
+                path="/admin/problems/:slug/edit"
+                element={
+                  <AdminGuard>
+                    <EditProblem />
+                  </AdminGuard>
+                }
+              ></Route>
+
+              <Route
+                path="/admin/problems"
+                element={
+                  <AdminGuard>
+                    <AdminProblemListPage />
+                  </AdminGuard>
+                }
+              ></Route>
+
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <AdminGuard>
+                    <AdminDashboard />
+                  </AdminGuard>
+                }
+              ></Route>
             </Routes>
           </div>
         </AuthProvider>

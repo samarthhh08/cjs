@@ -28,7 +28,7 @@ namespace CjsApi.Controllers
             {
                 AuthUserDto user = await _authService.SignInAsync(signInRequestDto);
 
-                var token = _jwtTokenService.GenerateToken(user.UserId, user.Email);
+                var token = _jwtTokenService.GenerateToken(user.UserId, user.Email,user.Role.ToString());
 
                 Response.Cookies.Append(
                     "access_token",
@@ -136,6 +136,8 @@ namespace CjsApi.Controllers
                     return Unauthorized();
 
                 var user = await _authService.GetUserInfoAsync(int.Parse(userId));
+
+                Console.WriteLine(user.Role);
 
                 return Ok(new ApiResponseDto<AuthUserDto>(
                     true,

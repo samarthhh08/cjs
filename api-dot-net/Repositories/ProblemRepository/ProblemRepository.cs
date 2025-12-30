@@ -82,12 +82,32 @@ namespace CjsApi.Repositories.ProblemRepository
         public async Task<Problem?> GetBySlugAsync(string slug)
         {
             return await _context.Problems
-                .Include(p => p.TestCases.Where(tc => tc.IsSample))
+                .Include(p => p.TestCases) // 🔥 load all test cases
                 .Include(p => p.ProblemTags)
                     .ThenInclude(pt => pt.Tag)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Slug == slug && p.IsPublished);
         }
+
+
+
+        public async Task<bool> ExistsByTitleAsync(string title)
+        {
+            return await _context.Problems
+                .AsNoTracking()
+                .AnyAsync(p => p.Title == title);
+        }
+
+
+        public async Task<Problem?> GetByIdWithRelationsAsync(int id)
+        {
+            return await _context.Problems
+                .Include(p => p.TestCases)
+                .Include(p => p.ProblemTags)
+                    .ThenInclude(pt => pt.Tag)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
 
 
         public async Task<Problem> CreateAsync(Problem problem)

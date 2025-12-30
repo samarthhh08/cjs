@@ -1,3 +1,4 @@
+using CjsApi.Dto;
 using CjsApi.Models;
 
 namespace CjsApi.Services.ProblemService
@@ -9,16 +10,16 @@ namespace CjsApi.Services.ProblemService
          Difficulty? difficulty,
          List<string>? tags
      );
-        Task<IEnumerable<Problem>> GetProblemsAsync(
-            Difficulty? difficulty,
-            List<string>? tags
-        );
+        // Task<IEnumerable<Problem>> GetProblemsAsync(
+        //     Difficulty? difficulty,
+        //     List<string>? tags
+        // );
 
         Task<Problem> GetProblemBySlugAsync(string slug);
         Task<Problem> GetProblemByIdAsync(int id);
 
-        Task<Problem> CreateProblemAsync(Problem problem);
-        Task UpdateProblemAsync(int id, Problem updatedProblem);
+        Task<int> CreateProblemAsync(CreateProblemDto createProblemDto);
+        Task<bool> UpdateProblemAsync(int id, UpdateProblemDto updateProblemDto);
         Task DeleteProblemAsync(int id);
     }
 }

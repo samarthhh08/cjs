@@ -25,5 +25,9 @@ namespace CjsApi.Repositories.ProblemRepository
         Task DeleteAsync(int id);
 
         Task<bool> ExistsBySlugAsync(string slug);
+
+        Task<bool> ExistsByTitleAsync(string title);
+
+        Task<Problem?> GetByIdWithRelationsAsync(int id);
     }
 }

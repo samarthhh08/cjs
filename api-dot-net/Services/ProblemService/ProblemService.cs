@@ -1,5 +1,8 @@
+using CjsApi.Dto;
 using CjsApi.Models;
 using CjsApi.Repositories.ProblemRepository;
+using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace CjsApi.Services.ProblemService
 {
@@ -12,21 +15,8 @@ namespace CjsApi.Services.ProblemService
             _problemRepository = problemRepository;
         }
 
-        public async Task<IEnumerable<Problem>> GetProblemsAsync(
-            Difficulty? difficulty,
-            List<string>? tags
-        )
-        {
-            return await _problemRepository.GetAllAsync(
-                onlyPublished: true,
-                difficulty: difficulty,
-                tags: tags
-            );
-        }
+        /* -------------------- READ -------------------- */
 
-
-
-        // For pagination
         public IQueryable<Problem> GetProblemsQueryable(
             Difficulty? difficulty,
             List<string>? tags
@@ -39,52 +29,123 @@ namespace CjsApi.Services.ProblemService
             );
         }
 
-
-        public async Task<Problem> GetProblemBySlugAsync(string slug)
+        public async Task<Problem?> GetProblemBySlugAsync(string slug)
         {
-            var problem = await _problemRepository.GetBySlugAsync(slug);
+            return await _problemRepository.GetBySlugAsync(slug);
+        }
+
+        public async Task<Problem?> GetProblemByIdAsync(int id)
+        {
+            return await _problemRepository.GetByIdAsync(id);
+        }
+
+
+
+
+        /* -------------------- CREATE -------------------- */
+
+        public async Task<int> CreateProblemAsync(CreateProblemDto dto)
+        {
+            // 🚫 Enforce unique title (fail fast)
+            if (await _problemRepository.ExistsByTitleAsync(dto.Title))
+            {
+                throw new InvalidOperationException("Problem title already exists");
+            }
+
+            // ✅ Inline slug generation
+            var slug = Regex.Replace(
+                dto.Title.ToLowerInvariant(),
+                @"[^a-z0-9]+",
+                "-"
+            ).Trim('-');
+
+            var problem = new Problem
+            {
+                Title = dto.Title,
+                Slug = slug,
+                Description = dto.Description,
+                Difficulty = dto.Difficulty,
+                TimeLimitMs = dto.TimeLimitMs,
+                MemoryLimitMb = dto.MemoryLimitMb,
+                IsPublished = dto.IsPublished,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            // Test cases
+            foreach (var tc in dto.TestCases)
+            {
+                problem.TestCases.Add(new TestCase
+                {
+                    Input = tc.Input,
+                    ExpectedOutput = tc.Output,
+                    IsSample = tc.IsSample
+                });
+            }
+
+            // Tags
+            foreach (var tagName in dto.Tags.Distinct())
+            {
+                problem.ProblemTags.Add(new ProblemTag
+                {
+                    Tag = new Tag { Name = tagName }
+                });
+            }
+
+            await _problemRepository.CreateAsync(problem);
+            return problem.Id;
+        }
+
+        /* -------------------- UPDATE -------------------- */
+
+        public async Task<bool> UpdateProblemAsync(int id, UpdateProblemDto dto)
+        {
+            var problem = await _problemRepository.GetByIdWithRelationsAsync(id);
+
             if (problem == null)
-                throw new KeyNotFoundException("Problem not found");
+                return false;
 
-            return problem;
+            // 🚫 Prevent title collision
+            if (problem.Title != dto.Title &&
+                await _problemRepository.ExistsByTitleAsync(dto.Title))
+            {
+                throw new InvalidOperationException("Problem title already exists");
+            }
+
+            problem.Title = dto.Title;
+            problem.Description = dto.Description;
+            problem.Difficulty = dto.Difficulty;
+            problem.TimeLimitMs = dto.TimeLimitMs;
+            problem.MemoryLimitMb = dto.MemoryLimitMb;
+            problem.IsPublished = dto.IsPublished;
+            problem.UpdatedAt = DateTime.UtcNow;
+
+            // Replace test cases
+            problem.TestCases.Clear();
+            foreach (var tc in dto.TestCases)
+            {
+                problem.TestCases.Add(new TestCase
+                {
+                    Input = tc.Input,
+                    ExpectedOutput = tc.Output,
+                    IsSample = tc.IsSample
+                });
+            }
+
+            // Replace tags
+            problem.ProblemTags.Clear();
+            foreach (var tagName in dto.Tags.Distinct())
+            {
+                problem.ProblemTags.Add(new ProblemTag
+                {
+                    Tag = new Tag { Name = tagName }
+                });
+            }
+
+            await _problemRepository.UpdateAsync(problem);
+            return true;
         }
 
-
-        public async Task<Problem> GetProblemByIdAsync(int id)
-        {
-            var problem = await _problemRepository.GetByIdAsync(id);
-            if (problem == null)
-                throw new KeyNotFoundException("Problem not found");
-
-            return problem;
-        }
-
-        public async Task<Problem> CreateProblemAsync(Problem problem)
-        {
-            if (await _problemRepository.ExistsBySlugAsync(problem.Slug))
-                throw new InvalidOperationException("Slug already exists");
-
-            problem.CreatedAt = DateTime.UtcNow;
-            problem.IsPublished = false; // admin publishes later
-
-            return await _problemRepository.CreateAsync(problem);
-        }
-
-        public async Task UpdateProblemAsync(int id, Problem updatedProblem)
-        {
-            var existing = await _problemRepository.GetByIdAsync(id);
-            if (existing == null)
-                throw new KeyNotFoundException("Problem not found");
-
-            existing.Title = updatedProblem.Title;
-            existing.Description = updatedProblem.Description;
-            existing.Difficulty = updatedProblem.Difficulty;
-            existing.TimeLimitMs = updatedProblem.TimeLimitMs;
-            existing.MemoryLimitMb = updatedProblem.MemoryLimitMb;
-            existing.IsPublished = updatedProblem.IsPublished;
-
-            await _problemRepository.UpdateAsync(existing);
-        }
+        /* -------------------- DELETE -------------------- */
 
         public async Task DeleteProblemAsync(int id)
         {

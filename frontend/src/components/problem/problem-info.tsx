@@ -1,5 +1,4 @@
 import type { Problem } from "@/types/problem";
-import { Card } from "../ui/card";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -9,7 +8,7 @@ type Props = {
 
 const ProblemInfo: React.FC<Props> = ({ problem }) => {
   return (
-    <Card className="h-full flex flex-col px-4 sm:px-8 py-4">
+    <div className="h-full flex flex-col px-4 sm:px-8 py-4">
       {/* Header */}
       <p className="font-bold text-xl sm:text-3xl mb-2">{problem.title}</p>
 
@@ -47,7 +46,7 @@ const ProblemInfo: React.FC<Props> = ({ problem }) => {
           ))}
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 

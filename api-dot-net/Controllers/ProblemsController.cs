@@ -1,13 +1,12 @@
 
 using CjsApi.Dto;
-using CjsApi.Dto.RequestDto;
 using CjsApi.Dto.ResponseDto;
-using CjsApi.Models;
-using CjsApi.Services;
-using CjsApi.Services.CodeExecution.Dto;
 using CjsApi.Services.ProblemService;
+using Docker.DotNet.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TestCaseDto = CjsApi.Dto.TestCaseDto;
 
 namespace CjsApi.Controllers
 {
@@ -114,6 +113,88 @@ namespace CjsApi.Controllers
 
 
 
+        [Authorize(Roles = "ADMIN")]
+        [HttpGet("admin/{slug}")]
+        public async Task<ActionResult<ApiResponseDto<AdminGetProblemDto>>> GetProblemAdmin(string slug)
+        {
+            var problem = await _problemService.GetProblemBySlugAsync(slug);
+
+            Console.Write("Test cases Count" + problem.TestCases.Count());
+
+            if (problem == null)
+            {
+                return NotFound(new ApiResponseDto<GetProblemDto>(
+                    false,
+                    "Problem not found",
+                    null
+                ));
+            }
+
+            var dto = new AdminGetProblemDto
+            {
+                Id = problem.Id,
+                Title = problem.Title,
+                Description = problem.Description,
+                Difficulty = problem.Difficulty,
+
+                Tags = problem.ProblemTags
+                    .Select(pt => pt.Tag.Name)
+                    .ToList(),
+
+                TestCases = problem.TestCases
+                    .Select(tc => new TestCaseDto
+                    {
+                        Input = tc.Input,
+                        Output = tc.ExpectedOutput,
+                        IsSample = tc.IsSample
+                    })
+                    .ToList()
+            };
+
+            return Ok(new ApiResponseDto<AdminGetProblemDto>(
+                true,
+                "Problem fetched successfully",
+                dto
+            ));
+        }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpPost]
+        public async Task<ActionResult<ApiResponseDto<int>>> CreateProblem(
+        [FromBody] CreateProblemDto dto)
+        {
+            var problemId = await _problemService.CreateProblemAsync(dto);
+
+            return Ok(new ApiResponseDto<int>(
+                true,
+                "Problem created successfully",
+                problemId
+            ));
+        }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<ApiResponseDto<bool>>> UpdateProblem(
+        int id,
+        [FromBody] UpdateProblemDto dto)
+        {
+            var updated = await _problemService.UpdateProblemAsync(id, dto);
+
+            if (!updated)
+            {
+                return NotFound(new ApiResponseDto<bool>(
+                    false,
+                    "Problem not found",
+                    false
+                ));
+            }
+
+            return Ok(new ApiResponseDto<bool>(
+                true,
+                "Problem updated successfully",
+                true
+            ));
+        }
 
     }
 

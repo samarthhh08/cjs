@@ -14,6 +14,24 @@ export type Problem = {
   hints?: string[];
 };
 
+
+
+export type AdminProblem = {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  tags: string[];
+  testCases: {
+    input: string;
+    output: string;
+    isSample:boolean;
+  }[];
+  constraints?: string[];
+  hints?: string[];
+};
+
 export type ProblemSubmission = {
   title: string;
   status: string;

@@ -1,10 +1,11 @@
 import { useAuth } from "@/auth/useAuth";
 import Logo from "../logo";
 import { Link } from "react-router-dom";
-import { FiUser } from "react-icons/fi";
+import { FiLogOut, FiUser } from "react-icons/fi";
 import { Button } from "../ui/button";
 import ConfirmLogoutModal from "../confirm-log-out-model";
 import { useState } from "react";
+import { MdDashboard } from "react-icons/md";
 
 const Links = [
   {
@@ -25,7 +26,7 @@ const Links = [
 ];
 
 const Header = () => {
-  const { isLoading, isAuthenticated, logout } = useAuth();
+  const { isLoading, isAuthenticated, logout, user } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -72,18 +73,38 @@ const Header = () => {
       )}
 
       {!isLoading && isAuthenticated && (
-        <div className="flex flex-row gap-x-2 ">
-          <Link to="/profile">
-            <FiUser className="bg-blue-600 text-white px-2 py-2 w-8 h-8 font-bold rounded-full" />
-          </Link>
-          {/* <p className="text-xs">{user?.username}</p> */}
+        <div className="flex items-center gap-4">
+          {/* USER PROFILE */}
+          {user?.role === "USER" && (
+            <Link
+              to="/profile"
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-600 text-white hover:ring-2 hover:ring-blue-400 transition"
+              title="Profile"
+            >
+              <FiUser className="w-4 h-4" />
+            </Link>
+          )}
 
+          {/* ADMIN DASHBOARD */}
+          {user?.role === "ADMIN" && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 transition"
+            >
+              <MdDashboard className="w-5 h-5" />
+              Dashboard
+            </Link>
+          )}
+
+          {/* LOGOUT */}
           <Button
-            className="text-xs  rounded-4xl flex px-3 py-0 "
-            variant={"outline"}
+            size="sm"
+            variant="outline"
             onClick={() => setOpen(true)}
+            className="flex items-center gap-1"
           >
-            Log Out
+            <FiLogOut className="w-4 h-4" />
+            Logout
           </Button>
         </div>
       )}

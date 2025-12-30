@@ -14,8 +14,9 @@ namespace CjsApi.Services
             _config = config;
         }
 
-        public string GenerateToken(string userId, string email, string role = "User")
+        public string GenerateToken(string userId, string email, string role = "USER")
         {
+            Console.WriteLine("Role = "+role);
             var claims = new[]
             {
             new Claim(JwtRegisteredClaimNames.Sub, userId),
