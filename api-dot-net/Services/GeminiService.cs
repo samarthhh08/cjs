@@ -14,11 +14,11 @@ public sealed class GeminiService
 
     public async Task<string> GenerateAsync(string prompt)
     {
-        var apiKey = _config["Gemini:ApiKey"];
-        var model = _config["Gemini:Model"];
+        var apiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+        var model = Environment.GetEnvironmentVariable("GEMINI_API_MODEL");
 
-       var url =
- $"https://generativelanguage.googleapis.com/v1beta/{model}:generateContent?key={apiKey}";
+        var url =
+  $"https://generativelanguage.googleapis.com/v1beta/{model}:generateContent?key={apiKey}";
 
 
 

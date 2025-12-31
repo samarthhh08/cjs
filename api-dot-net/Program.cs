@@ -18,10 +18,17 @@ using CjsApi.Services.UserService;
 using CjsApi.Repositories.SubmissionRepository;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.RateLimiting;
+
+
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+builder.Configuration
+    .AddEnvironmentVariables();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers()
@@ -81,14 +88,21 @@ builder.Services.AddAuthorization();
 
 
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString =
+    Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new Exception("DB_CONNECTION_STRING is not configured");
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
+{
     options.UseMySql(
         connectionString,
-        ServerVersion.AutoDetect(connectionString)
-    )
-);
+        new MySqlServerVersion(new Version(8, 0, 36)) // 👈 adjust if needed
+    );
+});
 
 
 // dependency Injection for Services and Repositories

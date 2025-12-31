@@ -44,8 +44,9 @@ pnpm-debug.log*
 # DOTNET / ASP.NET CORE (BACKEND)
 ####################################
 # Build results
-bin/
-obj/
+api-dot-net/bin/
+api-dot-net/obj/
+api-dot-net/.env
 
 # User-specific files
 *.user

@@ -31,14 +31,9 @@ function App() {
                 element={<SolutionPage />}
               />
 
+              {/* User routes */}
 
-            {/* User routes */}
-
-            <Route path="/profile" element = {<UserProfilePage/>} >
-            </Route>
-
-
-
+              <Route path="/profile" element={<UserProfilePage />}></Route>
 
               {/*Admin Routes */}
 
