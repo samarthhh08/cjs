@@ -12,7 +12,7 @@ import com.cjs.cjs_service.dto.response.AdminGetProblemDto;
 import com.cjs.cjs_service.service.ProblemService;
 
 import jakarta.validation.Valid;
-import com.cjs.cjs_service.model.ProblemTag;
+
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController

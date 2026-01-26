@@ -20,7 +20,6 @@ Start-Sleep -Seconds 10
 
 # 2️⃣ Auth Service
 Start-Service "Auth Service" "auth-service"
-
 Start-Sleep -Seconds 5
 
 # 3️⃣ Problem Service
