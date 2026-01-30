@@ -16,7 +16,12 @@ public class TestCaseDto {
     @NotBlank
     private String output = "";
 
-    private boolean isSample = false;
+    private boolean sample = false;
+
+    // public TestCaseDto(String input, String output) {
+    //     this.input = input;
+    //     this.output = output;
+    // }
 
     // getters and setters
 }
